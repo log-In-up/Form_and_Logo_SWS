@@ -13,11 +13,13 @@ namespace UserInterface
         [SerializeField] private Button _left = null;
         [SerializeField] private Button _next = null;
         [SerializeField] private Button _right = null;
-        [SerializeField] private Image _background = null;
         [SerializeField] private UniformAndLogoData _formAndLogoData = null;
         [SerializeField] private ColorViewer _colorViewer = null;
+        [SerializeField] private ColorPalette _colorPalette = null;
         [SerializeField] private FormAndLogoUIData _uiFormAndLogoData;
         [SerializeField] private UIAnimatedObjectsData _uIAnimatedObjectsData;
+        [SerializeField] private BackgroundData _backgroundData;
+        [SerializeField] private UITeamNameData uiTeamNameData;
         #endregion
 
         #region Fields
@@ -53,7 +55,8 @@ namespace UserInterface
                 _colorViewer, _formAndLogoData.GetUniforms),
                 [TeamSettingsState.Logo] = new LogoScreen(this, _playerTeamData, _left, _right, _next, _uiFormAndLogoData,
                 _colorViewer, _formAndLogoData.GetLogos, _uIAnimatedObjectsData),
-                [TeamSettingsState.TeamName] = new TeamNameScreen(_playerTeamData)
+                [TeamSettingsState.TeamName] = new TeamNameScreen(_playerTeamData, _left, _right, _next, _backgroundData,
+                _colorPalette, _colorViewer, _uIAnimatedObjectsData, uiTeamNameData)
             };
         }
 

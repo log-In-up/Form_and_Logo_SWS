@@ -1,11 +1,8 @@
 using Data.Player;
-using Data.Application;
 using Items;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using System.Collections;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace UserInterface
 {
@@ -77,25 +74,14 @@ namespace UserInterface
             }
 
             _formsIndex = 0;
-            SetUniform();
+            SetUniform(_availableUniforms[_formsIndex]);
         }
         #endregion
 
         #region Methods
-        private void SetUniform()
+        private void SetUniform(FormLogoObject itemData)
         {
-            FormLogoObject itemData = _availableUniforms[_formsIndex];
-
-            _uiFormAndLogoData.FirstForegroundLayer.sprite = itemData.FirstLayer;
-            _uiFormAndLogoData.FirstForegroundLayer.color = itemData.FirstLayerColor;
-
-            _uiFormAndLogoData.SecondForegroundLayer.sprite = itemData.SecondLayer;
-            _uiFormAndLogoData.SecondForegroundLayer.color = itemData.SecondLayerColor;
-
-            _uiFormAndLogoData.ThirdForegroundLayer.sprite = itemData.ThirdLayer;
-            _uiFormAndLogoData.ThirdForegroundLayer.color = itemData.ThirdLayerColor;
-
-            _uiFormAndLogoData.FourthForegroundLayer.sprite = itemData.FourthLayer;
+            _uiFormAndLogoData.SetForegroundUniform(itemData);
 
             List<Color> colors = new List<Color>
             {
@@ -106,22 +92,6 @@ namespace UserInterface
 
             _colorViewer.SetVieverColors(colors);
         }
-
-        private void SetBackgroundUniform()
-        {
-            FormLogoObject itemData = _availableUniforms[_formsIndex];
-
-            _uiFormAndLogoData.FirstBackgroundLayer.sprite = itemData.FirstLayer;
-            _uiFormAndLogoData.FirstBackgroundLayer.color = itemData.FirstLayerColor;
-
-            _uiFormAndLogoData.SecondBackgroundLayer.sprite = itemData.SecondLayer;
-            _uiFormAndLogoData.SecondBackgroundLayer.color = itemData.SecondLayerColor;
-
-            _uiFormAndLogoData.ThirdBackgroundLayer.sprite = itemData.ThirdLayer;
-            _uiFormAndLogoData.ThirdBackgroundLayer.color = itemData.ThirdLayerColor;
-
-            _uiFormAndLogoData.FourthBackgroundLayer.sprite = itemData.FourthLayer;
-        }
         #endregion
 
         #region Button handlers
@@ -131,12 +101,12 @@ namespace UserInterface
 
             _formsIndex--;
 
-            SetUniform();
+            SetUniform(_availableUniforms[_formsIndex]);
         }
 
         private void OnClickNext()
         {
-            SetBackgroundUniform();
+            _uiFormAndLogoData.SetBackgroundUniform(_availableUniforms[_formsIndex]);
 
             _playerTeamData.SetTeamUniform(_availableUniforms[_formsIndex]);
             
@@ -149,7 +119,7 @@ namespace UserInterface
 
             _formsIndex++;
 
-            SetUniform();
+            SetUniform(_availableUniforms[_formsIndex]);
         }
 
         private void OnSetColorForActiveToggle(Color color, int index)

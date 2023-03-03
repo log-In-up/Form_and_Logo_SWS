@@ -138,24 +138,15 @@ namespace UserInterface
         #region Methods
         private void SetLogo()
         {
-            FormLogoObject itemData = _availableLogos[_logosIndex];
+            FormLogoObject logo = _availableLogos[_logosIndex];
 
-            _uiFormAndLogoData.FirstLogoForegroundLayer.sprite = itemData.FirstLayer;
-            _uiFormAndLogoData.FirstLogoForegroundLayer.color = itemData.FirstLayerColor;
-
-            _uiFormAndLogoData.SecondLogoForegroundLayer.sprite = itemData.SecondLayer;
-            _uiFormAndLogoData.SecondLogoForegroundLayer.color = itemData.SecondLayerColor;
-
-            _uiFormAndLogoData.ThirdLogoForegroundLayer.sprite = itemData.ThirdLayer;
-            _uiFormAndLogoData.ThirdLogoForegroundLayer.color = itemData.ThirdLayerColor;
-
-            _uiFormAndLogoData.FourthLogoForegroundLayer.sprite = itemData.FourthLayer;
+            _uiFormAndLogoData.SetLogo(logo);
 
             List<Color> colors = new List<Color>
             {
-                itemData.FirstLayerColor,
-                itemData.SecondLayerColor,
-                itemData.ThirdLayerColor
+                logo.FirstLayerColor,
+                logo.SecondLayerColor,
+                logo.ThirdLayerColor
             };
 
             _colorViewer.SetVieverColors(colors);
@@ -205,6 +196,11 @@ namespace UserInterface
                 time -= Time.deltaTime;
 
                 yield return new WaitForEndOfFrame();
+            }
+
+            foreach (GameObject item in foregroundObjects)
+            {
+                item.SetActive(false);
             }
 
             _next.interactable = true;

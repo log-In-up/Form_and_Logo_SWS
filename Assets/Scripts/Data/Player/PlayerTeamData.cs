@@ -1,8 +1,4 @@
 using Items;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
 
 namespace Data.Player
 {
@@ -11,6 +7,11 @@ namespace Data.Player
         #region Fields
         private string _teamName;
         private FormLogoObject _logo, _uniform;
+        #endregion
+
+        #region Properties
+        public FormLogoObject Logo => _logo;
+        public FormLogoObject Uniform => _uniform;
         #endregion
 
         public PlayerTeamData()

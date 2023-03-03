@@ -22,12 +22,14 @@ namespace UserInterface
         #region MonoBehaviour API
         private void OnEnable()
         {
+            _randomButton.gameObject.SetActive(true);
             _randomButton.onClick.AddListener(OnClickRandom);
         }
 
         private void OnDisable()
         {
             _randomButton.onClick.RemoveListener(OnClickRandom);
+            _randomButton.gameObject.SetActive(false);
         }
         #endregion
 
