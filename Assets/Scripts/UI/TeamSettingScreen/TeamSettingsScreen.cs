@@ -50,9 +50,9 @@ namespace UserInterface
             _states = new Dictionary<TeamSettingsState, ITeamSettingsState>
             {
                 [TeamSettingsState.Form] = new FormScreen(this, _playerTeamData, _left, _right, _next, _uiFormAndLogoData,
-                _colorViewer, _formAndLogoData.GetUniforms, _uIAnimatedObjectsData),
+                _colorViewer, _formAndLogoData.GetUniforms),
                 [TeamSettingsState.Logo] = new LogoScreen(this, _playerTeamData, _left, _right, _next, _uiFormAndLogoData,
-                _colorViewer),
+                _colorViewer, _formAndLogoData.GetLogos, _uIAnimatedObjectsData),
                 [TeamSettingsState.TeamName] = new TeamNameScreen(_playerTeamData)
             };
         }

@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace UserInterface
 {
@@ -21,10 +22,10 @@ namespace UserInterface
         private TeamSettingsScreen _teamSettingsScreen = null;
         private List<FormLogoObject> _availableUniforms = null;
         private FormAndLogoUIData _uiFormAndLogoData;
-        private UIAnimatedObjectsData _uiAnimatedObjectsData;
+        
         #endregion
 
-        public FormScreen(TeamSettingsScreen teamSettingsScreen, PlayerTeamData playerTeamData, Button left, Button right, Button next, FormAndLogoUIData uiFormAndLogoData, ColorViewer colorViewer, List<ItemData> uniforms, UIAnimatedObjectsData uiAnimatedObjectsData)
+        public FormScreen(TeamSettingsScreen teamSettingsScreen, PlayerTeamData playerTeamData, Button left, Button right, Button next, FormAndLogoUIData uiFormAndLogoData, ColorViewer colorViewer, List<ItemData> uniforms)
         {
             _teamSettingsScreen = teamSettingsScreen;
             _playerTeamData = playerTeamData;
@@ -38,7 +39,6 @@ namespace UserInterface
             _availableUniforms = new List<FormLogoObject>();
             _uiFormAndLogoData = uiFormAndLogoData;
             _colorViewer = colorViewer;
-            _uiAnimatedObjectsData = uiAnimatedObjectsData;
         }
 
         #region Interface Implementation
@@ -73,6 +73,7 @@ namespace UserInterface
                 };
 
                 _availableUniforms.Add(formLogoObject);
+
             }
 
             _formsIndex = 0;
@@ -138,8 +139,8 @@ namespace UserInterface
             SetBackgroundUniform();
 
             _playerTeamData.SetTeamUniform(_availableUniforms[_formsIndex]);
-
-            _teamSettingsScreen.StartCoroutine(LaunchAnimation());
+            
+            _teamSettingsScreen.State = TeamSettingsState.Logo;
         }
 
         private void OnClickRight()
@@ -174,53 +175,6 @@ namespace UserInterface
             }
 
             _availableUniforms[_formsIndex] = itemData;
-        }
-        #endregion
-
-        #region Corotines
-        private IEnumerator LaunchAnimation()
-        {
-            float time = _uiAnimatedObjectsData.TimeToWait;
-            string name = "MovementIsOn";
-
-            List<GameObject> logoAndBackgroundObjects = new List<GameObject>
-            {
-                _uiAnimatedObjectsData.Logo,
-                _uiAnimatedObjectsData.FormOnBackground,
-                _uiAnimatedObjectsData.TopLogoText
-            };
-
-            foreach (GameObject backgroundObject in logoAndBackgroundObjects)
-            {
-                backgroundObject.SetActive(true);
-                if (backgroundObject.TryGetComponent(out Animator backgroundAnimator))
-                {
-                    backgroundAnimator.SetBool(name, true);
-                }
-            }
-
-            List<GameObject> foregroundObjects = new List<GameObject>
-            {
-                _uiAnimatedObjectsData.FormOnForeground,
-                _uiAnimatedObjectsData.TopUniformText
-            };
-
-            foreach(GameObject foregroundObject in foregroundObjects)
-            {
-                if (foregroundObject.TryGetComponent(out Animator foregroundAnimator))
-                {
-                    foregroundAnimator.SetBool(name, true);
-                }
-            }
-
-            while (time > 0.0f)
-            {
-                time -= Time.deltaTime;
-
-                yield return new WaitForEndOfFrame();
-            }
-
-            _teamSettingsScreen.State = TeamSettingsState.Logo;
         }
         #endregion
     }
