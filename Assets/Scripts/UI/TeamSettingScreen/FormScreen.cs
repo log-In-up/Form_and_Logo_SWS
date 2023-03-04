@@ -12,17 +12,13 @@ namespace UserInterface
         private int _formsIndex;
 
         private readonly Button _left = null, _next = null, _right = null;
-        private readonly List<ItemData> _uniforms = null;
-
-        private PlayerTeamData _playerTeamData = null;
-        private ColorViewer _colorViewer = null;
-        private TeamSettingsScreen _teamSettingsScreen = null;
-        private List<FormLogoObject> _availableUniforms = null;
+        private readonly TeamSettingsScreen _teamSettingsScreen = null;
+        private readonly PlayerTeamData _playerTeamData = null;
+        private readonly ColorViewer _colorViewer = null;
         private FormAndLogoUIData _uiFormAndLogoData;
-        
         #endregion
 
-        public FormScreen(TeamSettingsScreen teamSettingsScreen, PlayerTeamData playerTeamData, Button left, Button right, Button next, FormAndLogoUIData uiFormAndLogoData, ColorViewer colorViewer, List<ItemData> uniforms)
+        public FormScreen(TeamSettingsScreen teamSettingsScreen, PlayerTeamData playerTeamData, Button left, Button right, Button next, FormAndLogoUIData uiFormAndLogoData, ColorViewer colorViewer)
         {
             _teamSettingsScreen = teamSettingsScreen;
             _playerTeamData = playerTeamData;
@@ -31,9 +27,6 @@ namespace UserInterface
             _next = next;
             _right = right;
 
-            _uniforms = uniforms;
-
-            _availableUniforms = new List<FormLogoObject>();
             _uiFormAndLogoData = uiFormAndLogoData;
             _colorViewer = colorViewer;
         }
@@ -45,6 +38,7 @@ namespace UserInterface
             _next.onClick.RemoveListener(OnClickNext);
             _right.onClick.RemoveListener(OnClickRight);
             _colorViewer.OnSetColorForActiveToggle -= OnSetColorForActiveToggle;
+            _colorViewer.OnGetRandomColors -= OnGetRandomColors;
         }
 
         public void Initialize()
@@ -53,28 +47,10 @@ namespace UserInterface
             _next.onClick.AddListener(OnClickNext);
             _right.onClick.AddListener(OnClickRight);
             _colorViewer.OnSetColorForActiveToggle += OnSetColorForActiveToggle;
-
-            foreach (ItemData uniform in _uniforms)
-            {
-                List<Color> colors = _colorViewer.GetRandomColors(3);
-
-                FormLogoObject formLogoObject = new FormLogoObject
-                {
-                    FirstLayer = uniform.FirstLayer,
-                    FirstLayerColor = colors[0],
-                    SecondLayer = uniform.SecondLayer,
-                    SecondLayerColor = colors[1],
-                    ThirdLayer = uniform.ThirdLayer,
-                    ThirdLayerColor = colors[2],
-                    FourthLayer = uniform.FourthLayer
-                };
-
-                _availableUniforms.Add(formLogoObject);
-
-            }
+            _colorViewer.OnGetRandomColors += OnGetRandomColors;
 
             _formsIndex = 0;
-            SetUniform(_availableUniforms[_formsIndex]);
+            SetUniform(_teamSettingsScreen.AvailableUniforms[_formsIndex]);
         }
         #endregion
 
@@ -101,30 +77,30 @@ namespace UserInterface
 
             _formsIndex--;
 
-            SetUniform(_availableUniforms[_formsIndex]);
+            SetUniform(_teamSettingsScreen.AvailableUniforms[_formsIndex]);
         }
 
         private void OnClickNext()
         {
-            _uiFormAndLogoData.SetBackgroundUniform(_availableUniforms[_formsIndex]);
+            _uiFormAndLogoData.SetBackgroundUniform(_teamSettingsScreen.AvailableUniforms[_formsIndex]);
 
-            _playerTeamData.SetTeamUniform(_availableUniforms[_formsIndex]);
-            
+            _playerTeamData.SetTeamUniform(_teamSettingsScreen.AvailableUniforms[_formsIndex]);
+
             _teamSettingsScreen.State = TeamSettingsState.Logo;
         }
 
         private void OnClickRight()
         {
-            if (_formsIndex + 1 >= _availableUniforms.Count) return;
+            if (_formsIndex + 1 >= _teamSettingsScreen.AvailableUniforms.Count) return;
 
             _formsIndex++;
 
-            SetUniform(_availableUniforms[_formsIndex]);
+            SetUniform(_teamSettingsScreen.AvailableUniforms[_formsIndex]);
         }
 
         private void OnSetColorForActiveToggle(Color color, int index)
         {
-            FormLogoObject itemData = _availableUniforms[_formsIndex];
+            FormLogoObject itemData = _teamSettingsScreen.AvailableUniforms[_formsIndex];
 
             switch (index)
             {
@@ -143,8 +119,21 @@ namespace UserInterface
                 default:
                     break;
             }
+            _teamSettingsScreen.AvailableUniforms[_formsIndex] = itemData;
+        }
 
-            _availableUniforms[_formsIndex] = itemData;
+        private void OnGetRandomColors(List<Color> colors)
+        {
+            FormLogoObject itemData = _teamSettingsScreen.AvailableLogos[_formsIndex];
+
+            _uiFormAndLogoData.FirstForegroundLayer.color = colors[0];
+            _uiFormAndLogoData.SecondForegroundLayer.color = colors[1];
+            _uiFormAndLogoData.ThirdForegroundLayer.color = colors[2];
+            itemData.FirstLayerColor = colors[0];
+            itemData.SecondLayerColor = colors[1];
+            itemData.ThirdLayerColor = colors[2];
+
+            _teamSettingsScreen.AvailableLogos[_formsIndex] = itemData;
         }
         #endregion
     }

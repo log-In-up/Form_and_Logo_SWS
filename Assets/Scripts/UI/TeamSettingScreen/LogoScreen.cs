@@ -1,6 +1,7 @@
 using Data.Application;
 using Data.Player;
 using Items;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -12,18 +13,17 @@ namespace UserInterface
     {
         #region Fields
         private int _logosIndex;
+
         private readonly Button _left = null, _next = null, _right = null;
 
         private PlayerTeamData _playerTeamData = null;
         private TeamSettingsScreen _teamSettingsScreen = null;
         private ColorViewer _colorViewer = null;
         private FormAndLogoUIData _uiFormAndLogoData;
-        private List<FormLogoObject> _availableLogos = null;
-        private List<ItemData> _logos;
         private UIAnimatedObjectsData _uiAnimatedObjectsData;
         #endregion
 
-        public LogoScreen(TeamSettingsScreen teamSettingsScreen, PlayerTeamData playerTeamData, Button left, Button right, Button next, FormAndLogoUIData formAndLogoUIData, ColorViewer colorViewer, List<ItemData> logos, UIAnimatedObjectsData uiAnimatedObjectsData)
+        public LogoScreen(TeamSettingsScreen teamSettingsScreen, PlayerTeamData playerTeamData, Button left, Button right, Button next, FormAndLogoUIData formAndLogoUIData, ColorViewer colorViewer, UIAnimatedObjectsData uiAnimatedObjectsData)
         {
             _teamSettingsScreen = teamSettingsScreen;
             _playerTeamData = playerTeamData;
@@ -35,9 +35,6 @@ namespace UserInterface
             _uiFormAndLogoData = formAndLogoUIData;
             _colorViewer = colorViewer;
 
-            _availableLogos = new List<FormLogoObject>();
-            _logos = logos;
-
             _uiAnimatedObjectsData = uiAnimatedObjectsData;
         }
 
@@ -48,6 +45,7 @@ namespace UserInterface
             _next.onClick.RemoveListener(OnClickNext);
             _right.onClick.RemoveListener(OnClickRight);
             _colorViewer.OnSetColorForActiveToggle -= OnSetColorForActiveToggle;
+            _colorViewer.OnGetRandomColors -= OnGetRandomColors;
         }
 
         public void Initialize()
@@ -56,28 +54,10 @@ namespace UserInterface
             _next.onClick.AddListener(OnClickNext);
             _right.onClick.AddListener(OnClickRight);
             _colorViewer.OnSetColorForActiveToggle += OnSetColorForActiveToggle;
-
-            foreach (ItemData logos in _logos)
-            {
-                List<Color> colors = _colorViewer.GetRandomColors(3);
-
-                FormLogoObject formLogoObject = new FormLogoObject
-                {
-                    FirstLayer = logos.FirstLayer,
-                    FirstLayerColor = colors[0],
-                    SecondLayer = logos.SecondLayer,
-                    SecondLayerColor = colors[1],
-                    ThirdLayer = logos.ThirdLayer,
-                    ThirdLayerColor = colors[2],
-                    FourthLayer = logos.FourthLayer
-                };
-
-                _availableLogos.Add(formLogoObject);
-
-            }
+            _colorViewer.OnGetRandomColors += OnGetRandomColors;
 
             _logosIndex = 0;
-            SetLogo();
+            SetLogo(_teamSettingsScreen.AvailableLogos[_logosIndex]);
 
             _teamSettingsScreen.StartCoroutine(LaunchAnimation());
         }
@@ -90,28 +70,28 @@ namespace UserInterface
 
             _logosIndex--;
 
-            SetLogo();
+            SetLogo(_teamSettingsScreen.AvailableLogos[_logosIndex]);
         }
 
         private void OnClickNext()
         {
-            _playerTeamData.SetTeamLogo(_availableLogos[_logosIndex]);
+            _playerTeamData.SetTeamLogo(_teamSettingsScreen.AvailableLogos[_logosIndex]);
 
             _teamSettingsScreen.State = TeamSettingsState.TeamName;
         }
 
         private void OnClickRight()
         {
-            if (_logosIndex + 1 >= _availableLogos.Count) return;
+            if (_logosIndex + 1 >= _teamSettingsScreen.AvailableLogos.Count) return;
 
             _logosIndex++;
 
-            SetLogo();
+            SetLogo(_teamSettingsScreen.AvailableLogos[_logosIndex]);
         }
 
         private void OnSetColorForActiveToggle(Color color, int index)
         {
-            FormLogoObject itemData = _availableLogos[_logosIndex];
+            FormLogoObject itemData = _teamSettingsScreen.AvailableLogos[_logosIndex];
 
             switch (index)
             {
@@ -120,26 +100,37 @@ namespace UserInterface
                     itemData.FirstLayerColor = color;
                     break;
                 case 1:
-                    _uiFormAndLogoData.FirstLogoForegroundLayer.color = color;
+                    _uiFormAndLogoData.SecondLogoForegroundLayer.color = color;
                     itemData.SecondLayerColor = color;
                     break;
                 case 2:
-                    _uiFormAndLogoData.FirstLogoForegroundLayer.color = color;
+                    _uiFormAndLogoData.ThirdLogoForegroundLayer.color = color;
                     itemData.ThirdLayerColor = color;
                     break;
                 default:
                     break;
             }
+            _teamSettingsScreen.AvailableLogos[_logosIndex] = itemData;
+        }
 
-            _availableLogos[_logosIndex] = itemData;
+        private void OnGetRandomColors(List<Color> colors)
+        {
+            FormLogoObject itemData = _teamSettingsScreen.AvailableLogos[_logosIndex];
+
+            _uiFormAndLogoData.FirstLogoForegroundLayer.color = colors[0];
+            _uiFormAndLogoData.SecondLogoForegroundLayer.color = colors[1];
+            _uiFormAndLogoData.ThirdLogoForegroundLayer.color = colors[2];
+            itemData.FirstLayerColor = colors[0];
+            itemData.SecondLayerColor = colors[1];
+            itemData.ThirdLayerColor = colors[2];
+
+            _teamSettingsScreen.AvailableLogos[_logosIndex] = itemData;
         }
         #endregion
 
         #region Methods
-        private void SetLogo()
+        private void SetLogo(FormLogoObject logo)
         {
-            FormLogoObject logo = _availableLogos[_logosIndex];
-
             _uiFormAndLogoData.SetLogo(logo);
 
             List<Color> colors = new List<Color>
@@ -150,6 +141,7 @@ namespace UserInterface
             };
 
             _colorViewer.SetVieverColors(colors);
+            _teamSettingsScreen.AvailableLogos[_logosIndex] = logo;
         }
         #endregion
 
@@ -157,6 +149,8 @@ namespace UserInterface
         private IEnumerator LaunchAnimation()
         {
             _next.interactable = false;
+            _left.interactable = false;
+            _right.interactable = false;
 
             float time = _uiAnimatedObjectsData.TimeToWait;
             string name = "MovementIsOn";
@@ -204,6 +198,8 @@ namespace UserInterface
             }
 
             _next.interactable = true;
+            _left.interactable = true;
+            _right.interactable = true;
         }
         #endregion
     }

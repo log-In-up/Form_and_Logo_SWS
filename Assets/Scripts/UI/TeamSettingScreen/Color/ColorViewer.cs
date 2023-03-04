@@ -16,7 +16,9 @@ namespace UserInterface
 
         #region Event
         public delegate void ToggleColorButtonDelegate(Color color, int index);
+        public delegate void ToggleThreeColorButtonDelegate(List<Color> colors);
         public event ToggleColorButtonDelegate OnSetColorForActiveToggle;
+        public event ToggleThreeColorButtonDelegate OnGetRandomColors;
         #endregion
 
         #region MonoBehaviour API
@@ -58,6 +60,7 @@ namespace UserInterface
         #region Button Handlers
         private void OnClickRandom()
         {
+            List<Color> result = new List<Color>();
             List<Color> colors = new List<Color>(_colorPickerData.GetColors);
 
             for (int index = 0; index < _toggleColors.Count; index++)
@@ -65,12 +68,12 @@ namespace UserInterface
                 int randomIndex = Random.Range(0, colors.Count - 1);
                 Color color = colors[randomIndex];
 
+                result.Add(color);
                 colors.Remove(color);
 
                 _toggleColors[index].SetColor(color);
-
-                OnSetColorForActiveToggle?.Invoke(color, index);
             }
+            OnGetRandomColors?.Invoke(result);
         }
         #endregion
 

@@ -10,6 +10,7 @@ namespace Data.Player
         #endregion
 
         #region Properties
+        public string TeamName => _teamName;
         public FormLogoObject Logo => _logo;
         public FormLogoObject Uniform => _uniform;
         #endregion

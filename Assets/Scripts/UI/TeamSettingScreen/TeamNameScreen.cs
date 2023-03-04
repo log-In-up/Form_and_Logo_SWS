@@ -1,6 +1,7 @@
 using Data.Application;
 using Data.Player;
 using Items;
+using SaveSystem;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -19,13 +20,14 @@ namespace UserInterface
         private readonly UITeamNameData _uiTeamNameData;
         #endregion
 
-        public TeamNameScreen(PlayerTeamData playerTeamData, Button left,  Button right, Button next, BackgroundData backgroundData, ColorPalette colorPalette, ColorViewer colorViewer, UIAnimatedObjectsData uIAnimatedObjectsData, UITeamNameData uiTeamNameData)
+        public TeamNameScreen(PlayerTeamData playerTeamData, Button left, Button right, Button next, BackgroundData backgroundData, ColorPalette colorPalette, ColorViewer colorViewer, UIAnimatedObjectsData uIAnimatedObjectsData, UITeamNameData uiTeamNameData)
         {
+            _playerTeamData = playerTeamData;
+
             _left = left;
             _right = right;
             _next = next;
 
-            _playerTeamData = playerTeamData;
             _backgroundData = backgroundData;
             _colorPalette = colorPalette;
             _colorViewer = colorViewer;
@@ -93,11 +95,11 @@ namespace UserInterface
             _uiTeamNameData.InputField.onEndEdit.AddListener(OnEndEditTeamName);
             _uiTeamNameData.InputField.onValueChanged.AddListener(OnTeamValueChange);
 
-            FormLogoObject logo = _playerTeamData.Logo;
-            _uiTeamNameData.SetLogoData(logo);
+            _uiTeamNameData.SetLogoData(_playerTeamData.Logo);
+            _uiTeamNameData.SetUniformData(_playerTeamData.Uniform);
 
-            FormLogoObject uniform = _playerTeamData.Uniform;
-            _uiTeamNameData.SetUniformData(uniform);
+            _uiTeamNameData.InputField.text = _playerTeamData.TeamName != string.Empty ? _playerTeamData.TeamName : string.Empty;
+
         }
         #endregion
 
@@ -115,6 +117,7 @@ namespace UserInterface
                 return;
             }
             _playerTeamData.SetTeamName(teamName);
+            DataPersistenceManager.Instance.SaveGame();
         }
 
         private void OnTeamValueChange(string teamName)
